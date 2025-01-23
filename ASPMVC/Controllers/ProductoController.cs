@@ -1,7 +1,6 @@
 ﻿using ASPMVC.DTO;
 using ASPMVC.MySQL;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ASPMVC.Controllers
@@ -80,6 +79,7 @@ namespace ASPMVC.Controllers
         public ActionResult Delete(int id)
         {
             var result = _sqlService.DeleteProduct(id);
+            // If product was not deleted, return bad request
             if (!result)
             {
                 return BadRequest(new { message = "PRODUCT_CANT_DELETE" });

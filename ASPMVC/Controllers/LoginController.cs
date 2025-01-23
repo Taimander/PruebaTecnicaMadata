@@ -29,12 +29,15 @@ namespace ASPMVC.Controllers
         public IActionResult Login([FromBody] LoginDto model)
         {
             UserModel? user = _sqlService.GetUser(model.Username);
+            // If no user with that username is found
             if(user == null)
             {
                 return Unauthorized();
             }
+            // Check if password matches
             if (IsValidUser(user, model.Password))
             {
+                // Username and password matched, generate a token and send it to the client
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
                 var tokenDescriptor = new SecurityTokenDescriptor
@@ -84,7 +87,8 @@ namespace ASPMVC.Controllers
             var salt = Convert.ToBase64String(hmac.Key);
             var hash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(model.Password)));
 
-            _sqlService.CreateUser(new Models.UserModel(0, model.Username, hash, salt));
+            // Add user to the database
+            _sqlService.CreateUser(new UserModel(0, model.Username, hash, salt));
 
             return Ok("USER_REGISTERED_SUCESSFULLY");
         }

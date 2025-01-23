@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection") ?? throw new InvalidOperationException("Connection string 'MySqlConnection' not found.");
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+// Register SQL Service
 builder.Services.AddTransient<SqlService, SqlService>();
+// Setup Authentication service and jwt settings service
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -54,6 +56,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Add middleware to return JSON responses on not found API routes instead of the index.html
+// And return the index.html when a route is not found on non API routes. (For SPA routing)
 app.Use(async (context, next) =>
 {
     // Allow the pipeline to process the request first
