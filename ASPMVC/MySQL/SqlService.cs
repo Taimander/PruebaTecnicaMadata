@@ -92,7 +92,7 @@ namespace ASPMVC.MySQL
         }
 
 
-        public Producto[] getProducts()
+        public Producto[] GetProducts()
         {
             var queryResults = ExecuteQuery("SELECT * FROM Producto");
             List<Producto> productos = new List<Producto>();
@@ -109,7 +109,7 @@ namespace ASPMVC.MySQL
             return productos.ToArray();
         }
 
-        public Producto? getProduct(int id)
+        public Producto? GetProduct(int id)
         {
             var queryResults = ExecuteQuery("SELECT * FROM Producto WHERE id = @id LIMIT 1", new Dictionary<string, object> { { "@id", id } });
             if (queryResults.Count == 0) 
@@ -126,7 +126,7 @@ namespace ASPMVC.MySQL
                 );
         }
 
-        public bool createProduct(CreateProductoDto dto)
+        public bool CreateProduct(CreateProductoDto dto)
         {
             var queryResults = ExecuteNonQuery("INSERT INTO Producto(nombre, descripcion, precio, categoria) VALUES(@nombre, @descripcion, @precio, @categoria)",
                 new Dictionary<string, object> { { "@nombre", dto.Nombre }, { "@descripcion", dto.Descripcion }, { "@precio", dto.Precio }, { "@categoria", dto.Categoria } }
@@ -135,7 +135,7 @@ namespace ASPMVC.MySQL
             return queryResults > 0;
         }
 
-        public bool updateProduct(int id, CreateProductoDto dto)
+        public bool UpdateProduct(int id, CreateProductoDto dto)
         {
             var queryResults = ExecuteNonQuery("UPDATE Producto SET nombre = @nombre, descripcion = @descripcion, precio = @precio, categoria = @categoria WHERE id = @id",
                 new Dictionary<string, object> { { "@id", id}, { "@nombre", dto.Nombre }, { "@descripcion", dto.Descripcion }, { "@precio", dto.Precio }, { "@categoria", dto.Categoria } }
@@ -143,11 +143,44 @@ namespace ASPMVC.MySQL
             return queryResults > 0;
         }
 
-        public bool deleteProduct(int id)
+        public bool DeleteProduct(int id)
         {
             var queryResults = ExecuteNonQuery("DELETE FROM Producto WHERE id = @id", new Dictionary<string, object> { { "@id", id} });
 
             return queryResults > 0;
+        }
+
+        public bool CreateUser(UserModel model)
+        {
+            var queryResults = ExecuteNonQuery("INSERT INTO Usuario(usuario,hash_contrasena,salt_contrasena) VALUES(@usuario,@hash_contrasena,@salt_contrasena)",
+                new Dictionary<string, object> { { "@usuario", model.Usuario}, { "@hash_contrasena", model.HashContrasena}, { "@salt_contrasena", model.SaltContrasena } }
+                );
+            return queryResults > 0;
+        }
+        
+        public bool UserExists(string Username)
+        {
+            var queryResults = ExecuteQuery("SELECT COUNT(*) AS exist FROM Usuario WHERE usuario=@usuario",
+                new Dictionary<string, object> { { "@usuario", Username} }
+                );
+            return (long)queryResults.First()["exist"] > 0;
+        }
+
+        public UserModel? GetUser(string Username)
+        {
+            var queryResults = ExecuteQuery("SELECT * FROM Usuario WHERE usuario=@usuario",
+                new Dictionary<string, object> { { "@usuario", Username } }
+                );
+            if(queryResults.Count == 0)
+            {
+                return null;
+            }
+            return new UserModel(
+                (int)queryResults.First()["id"],
+                (string)queryResults.First()["usuario"],
+                (string)queryResults.First()["hash_contrasena"],
+                (string)queryResults.First()["salt_contrasena"]
+                );
         }
 
     }
